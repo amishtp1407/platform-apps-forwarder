@@ -420,7 +420,7 @@ class TransparentProxy:
         self,
         local: bool = True,
         forward: bool = True,
-        proxy_port: int = 8080,
+        proxy_port: int = 443,
         filter: str | None = "tcp.DstPort == 80 or tcp.DstPort == 443",
     ) -> None:
         self.proxy_port = proxy_port
@@ -569,8 +569,8 @@ if __name__ == "__main__":
         "-p",
         "--proxy-port",
         type=int,
-        metavar="8080",
-        default=8080,
+        metavar="443",
+        default=443,
         help="The port mitmproxy is listening on.",
     )
     def redirect(**options):

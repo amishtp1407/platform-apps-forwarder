@@ -570,7 +570,7 @@ if __name__ == "__main__":  # pragma: no cover
             },
         ).handle_client()
 
-    coro = asyncio.start_server(handle, "127.0.0.1", 8080, loop=loop)
+    coro = asyncio.start_server(handle, "127.0.0.1", 443, loop=loop)
     server = loop.run_until_complete(coro)
 
     # Serve requests until Ctrl+C is pressed

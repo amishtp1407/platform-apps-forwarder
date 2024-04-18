@@ -86,7 +86,7 @@ class ProxyMode(Serializable, metaclass=ABCMeta):
         """
         Default listen port of servers for this mode, see `ProxyMode.listen_port()`.
         """
-        return 8080
+        return 443
 
     @property
     @abstractmethod

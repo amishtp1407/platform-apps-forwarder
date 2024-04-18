@@ -15,8 +15,8 @@ from forwarder.utils import emoji
 
 logger = logging.getLogger(__name__)
 
-CONF_DIR = "~/.mitmproxy"
-LISTEN_PORT = 8080
+CONF_DIR = "/var/haltdos/forwarder"
+LISTEN_PORT = 443
 
 
 class Core:

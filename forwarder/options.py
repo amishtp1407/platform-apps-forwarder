@@ -101,7 +101,7 @@ class Options(optmanager.OptManager):
             Optional[int],
             None,
             "Port to bind proxy server(s) to (may be overridden for individual modes, see `mode`). "
-            "By default, the port is mode-specific. The default regular HTTP proxy spawns on port 8080.",
+            "By default, the port is mode-specific. The default regular HTTP proxy spawns on port 443.",
         )
         self.add_option(
             "mode",
