@@ -32,7 +32,7 @@ jobs:
 
       # Linux
       - if: matrix.platform == 'linux'
-        run: python -u release/build.py standalone-binaries wheel
+        run: python -u release/build.py standalone-binaries
 
       - uses: actions/upload-artifact@v4
         with:
