@@ -3,7 +3,7 @@ name: Create Forwarder App
 on:
   push:
     branches:
-        - main
+        - master
 
 permissions:
   contents: read
