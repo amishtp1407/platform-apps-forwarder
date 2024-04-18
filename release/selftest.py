@@ -15,7 +15,7 @@ from forwarder import ctx
 
 def load(_):
     # force a random port
-    ctx.options.listen_port = 0
+    ctx.options.listen_port = 8080
     try:
         ctx.options.web_open_browser = False
     except KeyError:
