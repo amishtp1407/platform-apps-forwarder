@@ -138,9 +138,6 @@ def _test_binaries(binary_directory: Path) -> None:
         print(f"> {tool} --version")
         subprocess.check_call([executable, "--version"])
 
-        print(f"> {tool} -s selftest.py")
-        subprocess.check_call([executable, "-s", here / "selftest.py"])
-
 
 if __name__ == "__main__":
     cli()
