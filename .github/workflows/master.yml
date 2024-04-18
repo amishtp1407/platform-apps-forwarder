@@ -26,8 +26,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - run: sudo mkdir -p /var/haltdos/forwarder
+      
       - run: pip install .[dev]  # pyinstaller 5.9 does not like pyproject.toml + editable installs.
-      - run: mkdir -p /var/haltdos/forwarder
+
       # Linux
       - if: matrix.platform == 'linux'
         run: python -u release/build.py standalone-binaries wheel
