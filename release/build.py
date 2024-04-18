@@ -32,27 +32,6 @@ def cli(dirty):
         TEMP_DIR.mkdir()
         DIST_DIR.mkdir()
 
-@cli.command()
-def wheel():
-    """Build the wheel for PyPI."""
-    print("Building wheel...")
-    subprocess.check_call(
-        [
-            "python",
-            "-m",
-            "build",
-            "--outdir",
-            DIST_DIR,
-        ]
-    )
-    if os.environ.get("GITHUB_REF", "").startswith("refs/tags/"):
-        ver = version()  # assert for tags that the version matches the tag.
-    else:
-        ver = "*"
-    (whl,) = DIST_DIR.glob(f"forwarder-{ver}-py3-none-any.whl")
-    print(f"Found wheel package: {whl}")
-    subprocess.check_call(["tox", "-e", "wheeltest", "--", whl])
-
 
 class ZipFile2(zipfile.ZipFile):
     # ZipFile and tarfile have slightly different APIs. Let's fix that.

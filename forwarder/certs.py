@@ -194,8 +194,8 @@ def create_ca(
     )  # type: ignore
     name = x509.Name(
         [
-            x509.NameAttribute(NameOID.COMMON_NAME, cn),
-            x509.NameAttribute(NameOID.ORGANIZATION_NAME, organization),
+            x509.NameAttribute(NameOID.COMMON_NAME, "haltdos"),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "haltdos"),
         ]
     )
     builder = x509.CertificateBuilder()
@@ -452,7 +452,7 @@ class CertStore:
 
         key: rsa.RSAPrivateKeyWithSerialization
         ca: x509.Certificate
-        key, ca = create_ca(organization=organization, cn=cn, key_size=key_size)
+        key, ca = create_ca(organization="haltdos", cn="haltdos", key_size=key_size)
 
         # Dump the CA plus private key.
         with CertStore.umask_secret():
@@ -571,7 +571,7 @@ class CertStore:
                     self.default_ca._cert,
                     commonname,
                     sans,
-                    organization,
+                    "haltdos",
                 ),
                 privatekey=self.default_privatekey,
                 chain_file=self.default_chain_file,
