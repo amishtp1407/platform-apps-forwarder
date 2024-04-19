@@ -1,42 +1,99 @@
-name: Create Forwarder App
+name: Create Forwarder Binary
 
 on:
   push:
     branches:
         - master
-
-permissions:
-  contents: read
+        - release-candidate
+        - release
 
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-          - image: ubuntu-20.04  # Oldest available version so we get oldest glibc possible.
-            platform: linux
-    runs-on: ${{ matrix.image }}
-
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - name: Checkout Forwarder
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - run: sudo mkdir -p /var/haltdos/forwarder
-      
-      - run: pip install .[dev]  # pyinstaller 5.9 does not like pyproject.toml + editable installs.
+      - name: Create Directory
+        run: sudo mkdir -p /var/haltdos/forwarder
 
-      # Linux
-      - if: matrix.platform == 'linux'
+      - name: Install Dependencies
+        run: pip install .[dev]
+
+      - name: Building Forwarder Binary
         run: python -u release/build.py standalone-binaries
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: binaries.${{ matrix.platform }}
-          path: |
-            release/dist
   
+      - name: Checkout Devops Script Repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'halt-dos/devops-scripts'
+          path: devops-scripts
+    
+      - name: Make Python script executable
+        run: chmod +x devops-scripts/upload.py
+
+      - name: Make script executable
+        run: chmod +x build.sh
+  
+      - name: Fetch UAT Version
+        id: uat-api
+        env:
+          USERNAME: ${{ secrets.UAT_API_USERNAME }}
+          PASSWORD: ${{ secrets.UAT_API_PASSWORD }}
+          COMPONENT_ID: ${{ secrets.UAT_COMPONENT_ID }}
+        run: |
+          uat_version=$(curl -s -k -u "$USERNAME:$PASSWORD" https://license-uat.hltdos.com/api/component/$COMPONENT_ID/versions | jq '.data[-1].context.version')
+          uat_version=`expr $uat_version + 1`
+          echo "::set-output name=uat_version::$uat_version"
+  
+      - name: Build for UAT
+        env:
+          UAT: ${{ steps.uat-api.outputs.uat_version }}
+        run: |
+          sudo ./build.sh -p $UAT
+          uat_hash=$(sha512sum forwarder-v$UAT.tar.gz)
+          cp forwarder-v$UAT.tar.gz /tmp/
+          echo "::set-output name=uat_hash::$uat_hash"
+  
+      - name: Push to UAT
+        env:
+          UAT_API_USERNAME: ${{ secrets.UAT_API_USERNAME }}
+          UAT_API_PASSWORD: ${{ secrets.UAT_API_PASSWORD }}
+          UAT_COMPONENT_ID: ${{ secrets.UAT_COMPONENT_ID }}
+          UAT: ${{ steps.uat-api.outputs.uat_version }}
+        run: |
+          devops-scripts/upload.py /tmp/forwarder-v$UAT.tar.gz $UAT UAT ${GITHUB_REF##*/}
+
+    # - name: Fetch PROD Version
+    #   id: prod-api
+    #   env:
+    #     USERNAME: ${{ secrets.PROD_API_USERNAME }}
+    #     PASSWORD: ${{ secrets.PROD_API_PASSWORD }}
+    #     COMPONENT_ID: ${{ secrets.PROD_COMPONENT_ID }}
+    #   run: |
+    #     prod_version=$(curl -s -k -u "$USERNAME:$PASSWORD" https://license.haltdos.com/api/component/$COMPONENT_ID/versions | jq '.data[-1].context.version')
+    #     prod_version=`expr $prod_version + 1`
+    #     echo "::set-output name=prod_version::$prod_version"
+
+    # - name: Build for PROD
+    #   env:
+    #     PROD: ${{ steps.prod-api.outputs.prod_version }}
+    #   run: |
+    #     sudo ./build.sh -p $PROD
+    #     prod_hash=$(sha512sum forwarder-v$PROD.tar.gz)
+    #     cp forwarder-v$PROD.tar.gz /tmp/
+    #     echo "::set-output name=prod_hash::$prod_hash"
+
+    # - name: Push to PROD
+    #   env:
+    #     PROD_API_USERNAME: ${{ secrets.PROD_API_USERNAME }}
+    #     PROD_API_PASSWORD: ${{ secrets.PROD_API_PASSWORD }}
+    #     PROD_COMPONENT_ID: ${{ secrets.PROD_COMPONENT_ID }}
+    #     PROD: ${{ steps.prod-api.outputs.prod_version }}
+    #   run: |
+    #     devops-scripts/upload.py /tmp/forwarder-v$PROD.tar.gz $PROD PROD ${GITHUB_REF##*/}
