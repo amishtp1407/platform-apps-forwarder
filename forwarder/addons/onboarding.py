@@ -2,7 +2,7 @@ from forwarder import ctx
 from forwarder.addons import asgiapp
 from forwarder.addons.onboardingapp import app
 
-APP_HOST = "mitm.it"
+APP_HOST = "haltdos-ca.it"
 
 
 class Onboarding(asgiapp.WSGIApp):
@@ -13,7 +13,7 @@ class Onboarding(asgiapp.WSGIApp):
 
     def load(self, loader):
         loader.add_option(
-            "onboarding", bool, True, "Toggle the mitmproxy onboarding app."
+            "onboarding", bool, False, "Toggle the mitmproxy onboarding app."
         )
         loader.add_option(
             "onboarding_host",
